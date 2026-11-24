@@ -56,6 +56,13 @@ stream, `vdisplay start`, `build-engine-fixes.sh`) isn't covered; say so when re
 
 CI (`.github/workflows/ci.yml`) runs the same three steps on a macOS runner.
 
+`.github/workflows/engine-fixes.yml` builds the engine modules for the runtime pinned in
+`scripts/build-engine-fixes.sh` (`RUNTIME_TAG`, `RUNTIME_SHA256`), checks them with
+`scripts/package-engine-fixes.sh` (x86_64, exports identical to the runtime's originals, winebus loads SDL), and
+releases them on `engine-fixes-*` tags with a provenance attestation. Moving to a new runtime means updating the
+pins (tag, hash, `WINECX_COMMIT`) together and tagging a new release. The checks don't prove a controller works:
+that still needs a game.
+
 ## Style
 
 - POSIX `sh` with macOS's BSD tools (`sed -i ''`, no GNU options). Python only as `python3 -I`, standard library.

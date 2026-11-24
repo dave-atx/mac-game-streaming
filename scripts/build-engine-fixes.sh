@@ -17,6 +17,13 @@ set -eu
 GS_HOME="$(cd "$(dirname "$(realpath "$0")")/.." && pwd)"
 . "$GS_HOME/scripts/wine-env.sh"
 
+# The engine release these fixes are built for; its own modules must match, since winebus.so and
+# winecoreaudio.so link against the runtime's ntdll.so. CI downloads this release and checks the hash.
+# Read with sed by the engine-fixes workflow and package-engine-fixes.sh.
+# shellcheck disable=SC2034
+RUNTIME_TAG=runtime-v4.8.1
+# shellcheck disable=SC2034
+RUNTIME_SHA256=e8b23bafa4e41be6c8ad468581bc92b86758bfd13c6fb4091585a33a4ec257d7
 WINECX_COMMIT=9f3f6447844add700bc0dde650e4f398fd5f69ab   # runtime-v4.8.1 release notes
 SDL_VERSION=2.32.10
 SDL_SHA256=5f5993c530f084535c65a6879e9b26ad441169b3e25d789d83287040a9ca5165

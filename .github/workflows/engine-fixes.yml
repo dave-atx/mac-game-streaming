@@ -1,0 +1,77 @@
+name: Engine fixes
+
+# Builds winebus.so (SDL controllers) and winecoreaudio.so (crackle fix) for the pinned winecx-gptk runtime,
+# checks them against the runtime's originals, and uploads them. A tag named engine-fixes-* also publishes a
+# release with a build provenance attestation (verify with `gh attestation verify <file> -R <this repo>`).
+
+# Runs on demand, on engine-fixes-* tags, and on pull requests that touch the build. (A push trigger can't
+# combine tags with paths: GitHub requires both to match.)
+on:
+  workflow_dispatch:
+  push:
+    tags: ["engine-fixes-*"]
+  pull_request:
+    paths: ["scripts/build-engine-fixes.sh", "scripts/package-engine-fixes.sh", "patches/**"]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-26
+    permissions:
+      contents: write       # release on tags
+      id-token: write       # attestation
+      attestations: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Tools
+        run: |
+          # Wine's configure runs under Rosetta (the engine is x86_64).
+          arch -x86_64 /usr/bin/true 2>/dev/null || sudo softwareupdate --install-rosetta --agree-to-license
+          brew install bison mingw-w64
+          command -v cmake >/dev/null || brew install cmake
+
+      - name: Download the runtime
+        run: |
+          tag=$(sed -n 's/^RUNTIME_TAG=//p' scripts/build-engine-fixes.sh)
+          sha=$(sed -n 's/^RUNTIME_SHA256=//p' scripts/build-engine-fixes.sh)
+          curl -fsSL -o "$RUNNER_TEMP/Libraries.tar.gz" \
+            "https://github.com/dappermint/winecx-gptk/releases/download/$tag/Libraries.tar.gz"
+          echo "$sha  $RUNNER_TEMP/Libraries.tar.gz" | shasum -a 256 -c -
+          mkdir -p "$RUNNER_TEMP/runtime"
+          tar -C "$RUNNER_TEMP/runtime" -xzf "$RUNNER_TEMP/Libraries.tar.gz"
+          test -f "$RUNNER_TEMP/runtime/Libraries/Wine/lib/wine/x86_64-unix/ntdll.so"
+          printf 'GS_RUNTIME="%s"\nWINEPREFIX="%s"\n' "$RUNNER_TEMP/runtime/Libraries" "$RUNNER_TEMP/prefix" \
+            >"$RUNNER_TEMP/config.env"
+
+      - name: Build
+        env:
+          GS_CONFIG: ${{ runner.temp }}/config.env
+          BUILD: ${{ runner.temp }}/build
+        run: scripts/build-engine-fixes.sh
+
+      - name: Check and pack
+        run: scripts/package-engine-fixes.sh "$RUNNER_TEMP/runtime/Libraries/Wine" "$RUNNER_TEMP/out" "$GITHUB_SHA"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: engine-fixes
+          path: |
+            ${{ runner.temp }}/out/*.tar.gz
+            ${{ runner.temp }}/out/*.tar.gz.sha256
+
+      - name: Attest
+        if: startsWith(github.ref, 'refs/tags/engine-fixes-')
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: ${{ runner.temp }}/out/*.tar.gz
+
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/engine-fixes-')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" "$RUNNER_TEMP"/out/*.tar.gz "$RUNNER_TEMP"/out/*.tar.gz.sha256 \
+            --title "$GITHUB_REF_NAME" --notes-file "$RUNNER_TEMP"/out/engine-fixes-*/README.md
