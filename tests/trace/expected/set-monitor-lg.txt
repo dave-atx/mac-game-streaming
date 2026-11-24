@@ -1,5 +1,6 @@
 vdisplay list
 exit 0
+set-monitor: ME1 MonitorIndex already 2
 --- ME1
 [SystemSettings]<CR>
 ResX=1920<CR>

@@ -31,5 +31,7 @@ for n in 1 2 3; do
     # The file has CRLF line endings; replacing only the digits keeps them.
     sed -i '' "s/^MonitorIndex=[0-9]*/MonitorIndex=$index/" "$f"
     echo "set-monitor: ME$n MonitorIndex $old -> $index"
+  else
+    echo "set-monitor: ME$n MonitorIndex already $index"
   fi
 done
