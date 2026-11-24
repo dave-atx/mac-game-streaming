@@ -1,0 +1,134 @@
+#!/bin/sh
+# gs: check and control the game-streaming setup (Sunshine, OpenJoystickDriver, vdisplay, the Wine bottle).
+# Install: ln -s "$PWD/scripts/gs" ~/.local/bin/gs
+set -u
+GS_HOME="$(cd "$(dirname "$(realpath "$0")")/.." && pwd)"
+. "$GS_HOME/scripts/wine-env.sh"
+
+SUNSHINE_APP="${SUNSHINE_APP:-$HOME/src/sunshine-macos-gamepads/build/Sunshine.app}"
+SUNSHINE_BIN="$SUNSHINE_APP/Contents/MacOS/Sunshine"
+SUNSHINE_LOG="$HOME/.config/sunshine/sunshine.log"
+EALOG="$WINEPREFIX/drive_c/ProgramData/EA Desktop/Logs/EADesktop.log"
+
+if [ -t 1 ]; then OK="$(printf '\033[32m✓\033[0m')"; NO="$(printf '\033[31m✗\033[0m')"; DIM="$(printf '\033[2m')"; END="$(printf '\033[0m')"
+else OK="ok"; NO="--"; DIM=""; END=""; fi
+row() { printf '%s %-12s %s\n' "$1" "$2" "$3"; }  # mark label text
+
+sunshine_pid() { pgrep -f "^$SUNSHINE_BIN" | head -1; }
+ojd_state() { ojd --json status 2>/dev/null | python3 -I -c 'import json,sys; print(json.load(sys.stdin)["service"]["state"])' 2>/dev/null || echo "not running"; }
+# Standard Screen Sharing (VNC, port 5900). When the Mac was locked as a session began, macOS locks it
+# again when that session ends, so an unlock done over Screen Sharing only lasts while it stays connected.
+# This assumes the Mac sits locked between streams, so "connected and unlocked" means "will lock on disconnect".
+screen_sharing() { netstat -an -p tcp 2>/dev/null | grep -qE '[.:]5900 +[^ ]+ +ESTABLISHED'; }
+SS_WARNING="This Mac was unlocked over Screen Sharing, so it locks again when Screen Sharing disconnects (including when the iPad suspends the app in the background). Keep Screen Sharing open in the foreground on the iPad, with Auto-Lock off, for the whole stream."
+
+wine_procs() { wine winedbg --command "info proc" 2>/dev/null | sed -n "s/.*'\(.*\)'.*/\1/p" | grep -vE '^(start|winedbg|services|winedevice|plugplay|svchost|rpcss|lsass|explorer|steamwebhelper|conhost)\.exe$' | sort -u | tr '\n' ' '; }
+
+cmd_status() {
+  # Can a stream start? vdisplay refuses while locked or asleep, and then Moonlight just shows an error.
+  if reason=$(vdisplay check 2>&1); then row "$OK" "Mac" "unlocked, displays awake"
+  else row "$NO" "Mac" "$reason ${DIM}(a stream can't start; unlock it first)${END}"; fi
+
+  if screen_sharing; then
+    if vdisplay check >/dev/null 2>&1; then row "$NO" "Sharing" "connected; ${DIM}the Mac locks again when it disconnects: keep it open${END}"
+    else row "$OK" "Sharing" "connected"; fi
+  else row "$DIM-$END" "Sharing" "not connected"; fi
+
+  if pid=$(sunshine_pid) && [ -n "$pid" ]; then row "$OK" "Sunshine" "running (pid $pid)"
+  else row "$NO" "Sunshine" "not running ${DIM}(gs up)${END}"; fi
+
+  state=$(ojd_state)
+  if [ "$state" = Running ]; then row "$OK" "Joystick" "OpenJoystickDriver running"
+  else row "$NO" "Joystick" "OpenJoystickDriver $state ${DIM}(gs up)${END}"; fi
+
+  if v=$(vdisplay status 2>&1); then row "$OK" "Display" "${v#vdisplay: }"
+  else row "$DIM-$END" "Display" "${v#vdisplay: } ${DIM}(created when a stream starts)${END}"; fi
+
+  if pgrep -qx wineserver; then row "$OK" "Bottle" "running: $(wine_procs)"
+  else row "$DIM-$END" "Bottle" "stopped"; fi
+
+  last=$(grep -iE 'cloud sync completed successfully|cloud sync failed|post game termination' "$EALOG" 2>/dev/null | tail -1)
+  if [ -n "$last" ]; then
+    when=$(printf '%s' "$last" | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9:]{8}' | head -1)
+    case "$last" in
+      *[Ss]ync\ completed*) row "$OK" "EA sync" "succeeded ${DIM}($when UTC)${END}" ;;
+      *termination*) row "$NO" "EA sync" "was in progress when the EA app stopped ${DIM}($when UTC; expect 'sync interrupted' once)${END}" ;;
+      *) row "$NO" "EA sync" "failed ${DIM}($when UTC)${END}" ;;
+    esac
+  fi
+}
+
+cmd_up() {
+  [ "$(ojd_state)" = Running ] || ojd service start
+  if [ -z "$(sunshine_pid)" ]; then
+    open "$SUNSHINE_APP"
+    i=0; while [ $i -lt 20 ] && [ -z "$(sunshine_pid)" ]; do sleep 1; i=$((i + 1)); done
+  fi
+  cmd_status
+}
+
+cmd_down() {
+  cmd_quit
+  if pid=$(sunshine_pid) && [ -n "$pid" ]; then
+    kill "$pid"
+    i=0; while [ $i -lt 15 ] && kill -0 "$pid" 2>/dev/null; do sleep 1; i=$((i + 1)); done
+  fi
+  [ "$(ojd_state)" = Running ] && ojd service stop
+  cmd_status
+}
+
+# Close the game with GS_QUIT (the same script Sunshine runs when you quit in Moonlight), then wait for
+# the bottle to stop. Without GS_QUIT, stop the bottle directly.
+cmd_quit() {
+  pgrep -qx wineserver || return 0
+  if [ -n "${GS_QUIT:-}" ]; then
+    echo "closing the game with $(basename "$GS_QUIT")…"
+    "$GS_QUIT"
+  else
+    wineserver -k
+  fi
+  i=0; while [ $i -lt 180 ] && pgrep -qx wineserver; do sleep 1; i=$((i + 1)); done
+  if [ -n "${GS_QUIT_LOG:-}" ]; then tail -n 3 "$GS_QUIT_LOG"; fi
+}
+
+# Show an alert on the main display (what Screen Sharing shows) when an unlock happens over Screen Sharing.
+# Runs in a loop; meant for a LaunchAgent (see launchd/gs-watch.plist.example).
+cmd_watch() {
+  was=0
+  while :; do
+    now=0
+    if screen_sharing && vdisplay check >/dev/null 2>&1; then now=1; fi
+    if [ $now = 1 ] && [ $was = 0 ]; then
+      /usr/bin/osascript -e 'on run argv' -e 'display alert "Keep Screen Sharing connected" message (item 1 of argv) as warning giving up after 60' -e 'end run' "$SS_WARNING" >/dev/null 2>&1 &
+    fi
+    was=$now
+    sleep 2
+  done
+}
+
+cmd_logs() {
+  # GS_LOGS is split on spaces on purpose.
+  # shellcheck disable=SC2086
+  exec tail -n 20 -F "$SUNSHINE_LOG" ${GS_LOGS:-}
+}
+
+case "${1:-status}" in
+  status) cmd_status ;;
+  up) cmd_up ;;
+  down) cmd_down ;;
+  quit) cmd_quit ;;
+  logs) cmd_logs ;;
+  watch) cmd_watch ;;
+  -h|--help|help)
+    cat <<EOF
+usage: gs [command]
+  status   (default) Mac lock state, Sunshine, OpenJoystickDriver, virtual display, bottle, last EA sync
+  up       start OpenJoystickDriver and Sunshine (e.g. after a reboot)
+  down     quit the game safely, then stop Sunshine and OpenJoystickDriver
+  quit     close the game (GS_QUIT) and stop the bottle
+  logs     follow the Sunshine log and GS_LOGS
+  watch    alert on screen when the Mac is unlocked over Screen Sharing (it relocks on disconnect)
+EOF
+    ;;
+  *) echo "gs: unknown command '$1' (gs help)" >&2; exit 64 ;;
+esac

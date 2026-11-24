@@ -1,0 +1,14 @@
+# Lines to add to ~/.config/sunshine/sunshine.conf (the gamepad fork plus the patches in the README).
+
+# The virtual display's device id. vdisplay always uses vendor 0x5644, model 1, serial 0x53554E31, and with the
+# libdisplaydevice fix (LizardByte/libdisplaydevice#332) the id is a hash of just those, so it's the same on
+# every Mac. Without that fix the id changes every time the display is created.
+output_name = macos-cg-8362b26f6b4599bd
+
+# Capture only the game's windows. Wine games show up as "wine".
+capture_apps = [wine]
+
+# OpenJoystickDriver: socketPath from `ojd --json access status`, and a token with the Control scope.
+ojd_socket_path = /var/folders/.../T/com.openjoystickdriver.endpoint.sock
+ojd_token = ojd_...
+ojd_rumble = enabled

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Runs `gs watch`, which pops an alert when the Mac is unlocked over Screen Sharing (it relocks when
+     Screen Sharing disconnects). Expects gs in ~/.local/bin. Install:
+       cp launchd/gs-watch.plist.example ~/Library/LaunchAgents/local.mac-game-streaming.gs-watch.plist
+       launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/local.mac-game-streaming.gs-watch.plist -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>local.mac-game-streaming.gs-watch</string>
+  <key>ProgramArguments</key>
+  <array><string>/bin/sh</string><string>-c</string><string>PATH="$HOME/.local/bin:/usr/bin:/bin:/usr/sbin:/sbin"; export PATH; exec gs watch</string></array>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>StandardErrorPath</key><string>/tmp/gs-watch.log</string>
+</dict>
+</plist>

@@ -1,0 +1,19 @@
+{
+  "apps": [
+    {
+      "name": "Mass Effect Legendary Edition",
+      "prep-cmd": [
+        { "do": "vdisplay start", "undo": "vdisplay stop" },
+        { "do": "", "undo": "/Users/YOU/src/mac-game-streaming/examples/mass-effect-le/me-quit.sh" },
+        { "do": "/Users/YOU/src/mac-game-streaming/scripts/sunshine/menubar.sh hide",
+          "undo": "/Users/YOU/src/mac-game-streaming/scripts/sunshine/menubar.sh show" },
+        { "do": "/Users/YOU/src/mac-game-streaming/scripts/sunshine/messages.sh quit",
+          "undo": "/Users/YOU/src/mac-game-streaming/scripts/sunshine/messages.sh restore" }
+      ],
+      "detached": [
+        "/Users/YOU/src/mac-game-streaming/examples/mass-effect-le/place-windows.sh",
+        "/Users/YOU/src/mac-game-streaming/examples/mass-effect-le/me-launch.sh"
+      ]
+    }
+  ]
+}
