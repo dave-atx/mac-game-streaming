@@ -1,0 +1,4 @@
+#!/bin/sh
+# Stand-in for cp: records the call in $TRACE instead of doing anything.
+echo "cp $*" >> "$TRACE"
+exit 0

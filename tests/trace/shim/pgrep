@@ -1,0 +1,4 @@
+#!/bin/sh
+# Stand-in for pgrep: records the call in $TRACE instead of doing anything.
+echo "pgrep $*" >> "$TRACE"
+exit "${PGREP_RC:-1}"

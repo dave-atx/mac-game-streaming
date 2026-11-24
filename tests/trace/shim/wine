@@ -1,0 +1,6 @@
+#!/bin/sh
+# Stand-in for wine: records the call in $TRACE instead of doing anything.
+echo "wine $*" >> "$TRACE"
+# `winedbg info proc` lists the Windows processes; FAKE_PROCS decides what's "running".
+case "$*" in *"info proc"*) [ -n "${FAKE_PROCS:-}" ] && echo "${FAKE_PROCS}" ;; esac
+exit 0

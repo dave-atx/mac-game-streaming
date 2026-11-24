@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Shellcheck
+        run: |
+          command -v shellcheck >/dev/null || brew install shellcheck
+          shellcheck -x -S warning scripts/gs scripts/*.sh scripts/sunshine/*.sh \
+            examples/mass-effect-le/*.sh tests/trace/run.sh tests/trace/shim/*
+
+      # Compile check only: creating a virtual display needs a logged-in WindowServer session.
+      - name: Build vdisplay
+        run: make -C vdisplay
+
+      - name: Lint examples
+        run: |
+          plutil -lint launchd/gs-watch.plist.example
+          python3 -m json.tool examples/mass-effect-le/apps.json >/dev/null
+
+      - name: Trace tests
+        run: tests/trace/run.sh

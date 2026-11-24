@@ -13,3 +13,6 @@ The guide is still being written. What's here so far:
   EA app, plus the matching Sunshine `apps.json` entry.
 
 Configuration lives in `~/.config/mac-game-streaming/config.env`; start from `config.env.example`.
+
+Tests: `tests/trace/run.sh` checks what the scripts would run, without Wine or a game. See `AGENTS.md` for the
+full check list.

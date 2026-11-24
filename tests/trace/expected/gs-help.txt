@@ -1,0 +1,8 @@
+exit 0
+usage: gs [command]
+  status   (default) Mac lock state, Sunshine, OpenJoystickDriver, virtual display, bottle, last EA sync
+  up       start OpenJoystickDriver and Sunshine (e.g. after a reboot)
+  down     quit the game safely, then stop Sunshine and OpenJoystickDriver
+  quit     close the game (GS_QUIT) and stop the bottle
+  logs     follow the Sunshine log and GS_LOGS
+  watch    alert on screen when the Mac is unlocked over Screen Sharing (it relocks on disconnect)

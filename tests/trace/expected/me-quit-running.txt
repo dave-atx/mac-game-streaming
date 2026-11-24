@@ -1,0 +1,29 @@
+pgrep -qx wineserver
+wine winedbg --command info proc
+wine taskkill /im MassEffect1.exe
+wine taskkill /im MassEffect2.exe
+wine taskkill /im MassEffect3.exe
+wine taskkill /im MassEffectLauncher.exe
+wine winedbg --command info proc
+wine winedbg --command info proc
+wine winedbg --command info proc
+wine winedbg --command info proc
+wine winedbg --command info proc
+wine winedbg --command info proc
+wine winedbg --command info proc
+wine winedbg --command info proc
+wine winedbg --command info proc
+wine winedbg --command info proc
+wine winedbg --command info proc
+wine winedbg --command info proc
+wine winedbg --command info proc
+wine winedbg --command info proc
+wine winedbg --command info proc
+wine taskkill /f /im MassEffect1.exe
+wine taskkill /f /im MassEffect2.exe
+wine taskkill /f /im MassEffect3.exe
+wine taskkill /f /im MassEffectLauncher.exe
+pgrep -qx wineserver
+wine winedbg --command info proc
+wineserver -k
+exit 0

@@ -1,0 +1,16 @@
+pgrep -qf steam\.exe
+exit 0
+"UserLocalConfigStore"
+{
+	"Software"
+	{
+		"apps"
+		{
+			"1328670"
+			{
+				"LaunchOptions"		"-game 2 -autoterminate"
+				"LastPlayed"		"1"
+			}
+		}
+	}
+}

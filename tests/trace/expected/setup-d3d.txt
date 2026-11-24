@@ -1,0 +1,25 @@
+cp HOME/runtime/Libraries/DXVK/x64/d3d11.dll HOME/runtime/Libraries/DXVK/x64/d3d10core.dll HOME/prefix/drive_c/windows/system32/
+cp HOME/runtime/Libraries/Wine/lib/wine/x86_64-windows/dxgi.dll HOME/prefix/drive_c/windows/system32/dxgi.dll
+cp HOME/runtime/Libraries/DXVK/x32/d3d11.dll HOME/runtime/Libraries/DXVK/x32/d3d10core.dll HOME/prefix/drive_c/windows/syswow64/
+cp HOME/runtime/Libraries/Wine/lib/wine/i386-windows/dxgi.dll HOME/prefix/drive_c/windows/syswow64/dxgi.dll
+cp HOME/runtime/Libraries/DXMT/x64/d3d11.dll HOME/runtime/Libraries/DXMT/x64/dxgi.dll HOME/runtime/Libraries/DXMT/x64/d3d10core.dll HOME/prefix/drive_c/Program Files (x86)/Steam/steamapps/common/Mass Effect Legendary Edition/Game/ME1/Binaries/Win64/
+cp HOME/runtime/Libraries/DXMT/x64/d3d11.dll HOME/runtime/Libraries/DXMT/x64/dxgi.dll HOME/runtime/Libraries/DXMT/x64/d3d10core.dll HOME/prefix/drive_c/Program Files (x86)/Steam/steamapps/common/Mass Effect Legendary Edition/Game/ME2/Binaries/Win64/
+cp HOME/runtime/Libraries/DXMT/x64/d3d11.dll HOME/runtime/Libraries/DXMT/x64/dxgi.dll HOME/runtime/Libraries/DXMT/x64/d3d10core.dll HOME/prefix/drive_c/Program Files (x86)/Steam/steamapps/common/Mass Effect Legendary Edition/Game/ME3/Binaries/Win64/
+cp HOME/runtime/Libraries/DXMT/x64/d3d11.dll HOME/runtime/Libraries/DXMT/x64/dxgi.dll HOME/runtime/Libraries/DXMT/x64/d3d10core.dll HOME/prefix/drive_c/Program Files (x86)/Steam/steamapps/common/Mass Effect Legendary Edition/Game/Launcher/
+wine reg add HKCU\Software\Wine\AppDefaults\MassEffect1.exe\DllOverrides /v d3d11 /t REG_SZ /d native /f
+wine reg add HKCU\Software\Wine\AppDefaults\MassEffect1.exe\DllOverrides /v dxgi /t REG_SZ /d native /f
+wine reg add HKCU\Software\Wine\AppDefaults\MassEffect1.exe\DllOverrides /v d3d10core /t REG_SZ /d native /f
+wine reg add HKCU\Software\Wine\AppDefaults\MassEffect2.exe\DllOverrides /v d3d11 /t REG_SZ /d native /f
+wine reg add HKCU\Software\Wine\AppDefaults\MassEffect2.exe\DllOverrides /v dxgi /t REG_SZ /d native /f
+wine reg add HKCU\Software\Wine\AppDefaults\MassEffect2.exe\DllOverrides /v d3d10core /t REG_SZ /d native /f
+wine reg add HKCU\Software\Wine\AppDefaults\MassEffect3.exe\DllOverrides /v d3d11 /t REG_SZ /d native /f
+wine reg add HKCU\Software\Wine\AppDefaults\MassEffect3.exe\DllOverrides /v dxgi /t REG_SZ /d native /f
+wine reg add HKCU\Software\Wine\AppDefaults\MassEffect3.exe\DllOverrides /v d3d10core /t REG_SZ /d native /f
+wine reg add HKCU\Software\Wine\AppDefaults\MassEffectLauncher.exe\DllOverrides /v d3d11 /t REG_SZ /d native /f
+wine reg add HKCU\Software\Wine\AppDefaults\MassEffectLauncher.exe\DllOverrides /v dxgi /t REG_SZ /d native /f
+wine reg add HKCU\Software\Wine\AppDefaults\MassEffectLauncher.exe\DllOverrides /v d3d10core /t REG_SZ /d native /f
+wine reg add HKCU\Software\Wine\AppDefaults\steamwebhelper.exe\DllOverrides /v d3d11 /t REG_SZ /d native /f
+wine reg add HKCU\Software\Wine\AppDefaults\steamwebhelper.exe\DllOverrides /v d3d10core /t REG_SZ /d native /f
+pgrep -qf steam.exe
+wineserver -w
+exit 0

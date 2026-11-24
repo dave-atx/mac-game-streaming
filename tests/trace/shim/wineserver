@@ -1,0 +1,4 @@
+#!/bin/sh
+# Stand-in for wineserver: records the call in $TRACE instead of doing anything.
+echo "wineserver $*" >> "$TRACE"
+exit 0

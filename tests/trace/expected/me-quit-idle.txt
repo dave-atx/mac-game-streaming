@@ -1,0 +1,2 @@
+pgrep -qx wineserver
+exit 0
