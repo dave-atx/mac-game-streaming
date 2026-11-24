@@ -12,7 +12,9 @@ launched() {
   wine winedbg --command "info proc" 2>/dev/null | grep -qE "EASteamLauncher|MassEffect"
 }
 
-wine "C:\\Program Files (x86)\\Steam\\steam.exe" "$URL" >"$LOG" 2>&1 &
+: >"$LOG"
+"$GS_HOME/examples/mass-effect-le/set-monitor.sh" >>"$LOG" 2>&1
+wine "C:\\Program Files (x86)\\Steam\\steam.exe" "$URL" >>"$LOG" 2>&1 &
 for attempt in 1 2 3; do
   i=0
   while [ $i -lt 20 ]; do

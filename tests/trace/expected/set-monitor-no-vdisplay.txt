@@ -1,0 +1,11 @@
+vdisplay list
+exit 0
+set-monitor: no streaming display, leaving MonitorIndex alone
+--- ME1
+[SystemSettings]<CR>
+ResX=1920<CR>
+MonitorIndex=2<CR>
+BorderlessWindow=True<CR>
+--- ME2
+[SystemSettings]<CR>
+ResX=1920<CR>

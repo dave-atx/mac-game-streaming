@@ -36,6 +36,9 @@ incidents, not style.
   `winebus.sys`).
 - **Don't start Steam, launchers or games from an agent's shell.** Wine inherits the environment, including agent
   tokens. Launch through Sunshine or a plain login shell.
+- **Never hard-code a game's monitor index.** Wine numbers monitors main display first, then the rest in macOS's
+  order, so the index of the streaming display changes when an external display is unplugged; the game then falls
+  back to the main display and the stream goes black. Compute it at launch (`examples/mass-effect-le/set-monitor.sh`).
 - On this engine Windows programs show up as `wine` in `ps`, and `pgrep MassEffect1` finds nothing. Use
   `wine winedbg --command "info proc"` for the Windows process tree.
 

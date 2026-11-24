@@ -1,0 +1,5 @@
+#!/bin/sh
+# Stand-in for vdisplay: records the call; `list` prints FAKE_DISPLAYS (with \t escapes).
+echo "vdisplay $*" >> "$TRACE"
+[ "${1:-}" = list ] && printf '%b' "${FAKE_DISPLAYS:-}"
+exit 0

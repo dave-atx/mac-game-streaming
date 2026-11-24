@@ -1,3 +1,4 @@
+vdisplay list
 wine C:\Program Files (x86)\Steam\steam.exe steam://rungameid/1328670
 wine winedbg --command info proc
 exit 0

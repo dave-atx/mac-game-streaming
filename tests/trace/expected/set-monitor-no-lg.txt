@@ -1,0 +1,11 @@
+vdisplay list
+exit 0
+set-monitor: ME1 MonitorIndex 2 -> 1
+--- ME1
+[SystemSettings]<CR>
+ResX=1920<CR>
+MonitorIndex=1<CR>
+BorderlessWindow=True<CR>
+--- ME2
+[SystemSettings]<CR>
+ResX=1920<CR>
