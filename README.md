@@ -16,3 +16,5 @@ Configuration lives in `~/.config/mac-game-streaming/config.env`; start from `co
 
 Tests: `tests/trace/run.sh` checks what the scripts would run, without Wine or a game. See `AGENTS.md` for the
 full check list.
+
+License: MIT (`LICENSE`), except `patches/`, which is GPL-3.0 (`patches/README.md`).

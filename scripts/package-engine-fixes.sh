@@ -50,7 +50,10 @@ Install: keep the originals once, then copy the \`Wine\` folder over the runtime
 \`for f in lib/wine/x86_64-unix/winebus.so lib/wine/x86_64-unix/winecoreaudio.so lib/libSDL2-2.0.0.dylib; do cp -p "\$LIB/Wine/\$f" "\$LIB/Wine/\$f.orig"; done\`
 with \`LIB\` set to the runtime's \`Libraries\` folder. Quit every Wine program first.
 
-Sources (LGPL-2.1-or-later for the Wine modules, zlib for SDL):
+Licenses: \`winebus.so\` is LGPL-2.1-or-later (Wine). \`winecoreaudio.so\` is GPL-3.0: Wine's LGPL-2.1-or-later
+code with Bridgeplay's GPL-3.0 render-buffer patch. \`libSDL2\` is zlib.
+
+Sources:
 - Wine: https://github.com/dappermint/winecx at \`$WINECX_COMMIT\`, plus \`patches/winecoreaudio-render-buffer.patch\`
 - SDL: https://github.com/libsdl-org/SDL/releases/tag/release-$SDL_VERSION
 - Build script and patch: $REPO_URL at \`$REF\` (\`scripts/build-engine-fixes.sh\`)
